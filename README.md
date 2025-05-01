@@ -122,4 +122,6 @@ nodemon
 ---
 
 ## 👥 Team Members
-- **Your Name** – Full Stack Developer, Project Lead
+- **Kushal Yadav**
+- **Rajnish Kumar**
+- **Ankur Gaur**  
