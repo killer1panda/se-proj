@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Update Inventory</title>
+</head>
+<body>
+  <h1>Update Inventory</h1>
+
+  <div>
+    <h3>Select an Item</h3>
+    <select id="item-select"></select>
+  </div>
+
+  <label for="quantity">New Quantity:</label>
+  <input type="number" id="quantity" placeholder="Enter new quantity" required />
+  <br><br>
+  <button onclick="updateInventory()">Update Inventory</button>
+
+  <h3>All Inventory Items</h3>
+  <ul id="item-list"></ul>
+
+  <script>
+    const backendUrl = 'http://localhost:5009'; // change this if your backend is running on a different port
+
+    // Fetch and display all items
+    async function fetchItems() {
+      try {
+        const response = await fetch(`${backendUrl}/api/inventory`);
+        const items = await response.json();
+
+        const itemList = document.getElementById('item-list');
+        const itemSelect = document.getElementById('item-select');
+        itemList.innerHTML = '';
+        itemSelect.innerHTML = '';
+
+        items.forEach(item => {
+          // Add to dropdown
+          const option = document.createElement('option');
+          option.value = item._id;
+          option.textContent = `${item.name} (Qty: ${item.quantity})`;
+          itemSelect.appendChild(option);
+
+          // Add to list
+          const li = document.createElement('li');
+          li.textContent = `ID: ${item._id}, Name: ${item.name}, Quantity: ${item.quantity}`;
+          itemList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error fetching inventory:', error);
+      }
+    }
+
+    // Update selected item's quantity
+    async function updateInventory() {
+      const itemId = document.getElementById('item-select').value;
+      const quantity = document.getElementById('quantity').value;
+
+      if (!itemId || !quantity) {
+        alert('Please select an item and enter a quantity.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${backendUrl}/api/inventory/${itemId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantity: parseInt(quantity) })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update inventory');
+        }
+
+        const updatedItem = await response.json();
+        alert(`Inventory updated! New quantity: ${updatedItem.quantity}`);
+        fetchItems(); // Refresh list
+      } catch (error) {
+        console.error(error);
+        alert('Error updating inventory');
+      }
+    }
+
+    // Load items on page load
+    window.onload = fetchItems;
+  </script>
+</body>
+</html>
